@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Which the Penguins Weep </title>
+    <style>
+        :root {
+            --common: #b2bec3;
+            --rare: #0984e3;
+            --epic: #6c5ce7;
+            --bg: #0f0f0f;
+            --card-bg: #1e1e1e;
+            --text: #dfe6e9;
+            --accent: #b8e994;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(180deg, #2d3436 0%, #0f0f0f 100%);
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        h1 { margin: 0; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
+
+        .filters {
+            max-width: 1400px;
+            margin: 0 auto 30px auto;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            justify-content: center;
+            border: 1px solid #333;
+        }
+
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .filter-group label { font-size: 0.75rem; text-transform: uppercase; color: var(--accent); font-weight: bold; }
+        .filter-group select, .filter-group input {
+            background: #2d3436;
+            border: 1px solid #444;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            outline: none;
+
+            
+        }
+
+        
+
+        .reset-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            height: 38px;
+        }
+
+        .rarity-header {
+            grid-column: 1 / -1;
+            padding: 10px;
+            margin-top: 30px;
+            border-bottom: 1px solid #444;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            min-height: 280px;
+        }
+
+        .card:hover { transform: translateY(-10px); border-color: #fff; }
+        .card-type-bar { height: 6px; width: 100%; }
+        .Common .card-type-bar { background: var(--common); }
+        .Rare .card-type-bar { background: var(--rare); }
+        .Epic .card-type-bar { background: var(--epic); }
+
+        .card-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .card-title { font-size: 1.1rem; font-weight: bold; color: #fff; }
+        .energy-circle {
+            background: #f1c40f; color: #000;
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
+        }
+
+        .food-tag {
+            font-size: 0.75rem; color: var(--accent);
+            background: rgba(184, 233, 148, 0.1);
+            padding: 2px 8px; border-radius: 4px; margin-bottom: 12px; width: fit-content;
+        }
+
+        .description { font-size: 0.9rem; line-height: 1.4; color: #bdc3c7; flex-grow: 1; }
+        .stats-footer { margin-top: 15px; display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #333; }
+        .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #636e72; }
+        .stat-value { font-weight: bold; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>In Which the Penguins Weep</h1>
+    </header>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label>Search</label>
+            <input type="text" id="filterSearch" placeholder="Search name..." oninput="filterData()">
+        </div>
+        <div class="filter-group">
+            <label>Rarity</label>
+            <select id="filterRarity" onchange="filterData()">
+                <option value="All">All Rarities</option>
+                <option value="Common">Common</option>
+                <option value="Rare">Rare</option>
+                <option value="Epic">Epic</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Group</label>
+            <select id="filterGroup" onchange="filterData()">
+                <option value="All">All Groups</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Starch">Starch</option>
+                <option value="Vegetable">Vegetable</option>
+                <option value="Meat">Meat</option>
+                <option value="Seafood">Seafood</option>
+                <option value="Fruit and Nuts">Fruit and Nuts</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Max Energy</label>
+            <input type="number" id="filterEnergy" placeholder="Max" oninput="filterData()">
+        </div>
+        <div class="filter-group">
+    <label>Mechanic</label>
+   <select id="filterMechanic" onchange="filterData()">
+    <option value="All">All Mechanics</option>
+    <option value="Burn">Burn</option>
+    <option value="Chill">Chilled</option>
+    <option value="Conjure">Conjure</option>
+    <option value="Copy">Copy</option>
+    <option value="Curse">Curse</option>
+    <option value="Discard">Discard</option>
+    <option value="Draw">Draw</option>
+    <option value="Energize">Energize / Energy</option>
+    <option value="Ethereal">Ethereal</option>
+    <option value="Garnish">Garnish</option>
+    <option value="Heavy">Heavy</option>
+    <option value="Hunger">Hunger / Satisfy</option>
+    <option value="Impatience">Impatience</option>
+    <option value="Impress">Impress</option>
+    <option value="Light">Light</option>
+    <option value="Monster Platter">Monster Platter</option>
+    <option value="Move">Move</option>
+    <option value="Night">Night</option>
+    <option value="Pack">Pack</option>
+    <option value="Persistent">Persistent</option>
+    <option value="Popular Demand">Popular Demand</option>
+    <option value="Raw">Raw</option>
+    <option value="Ready to Serve">Ready to Serve</option>
+    <option value="Silence Hand">Silence Hand</option>
+    <option value="Spicy">Spicy</option>
+    <option value="Stack">Stack</option>
+    <option value="Stress">Stress</option>
+    <option value="Tempt">Tempt</option>
+    <option value="Tough">Tough</option>
+    <option value="Transform">Transform / Merge</option>
+    <option value="Wish">Wish</option>
+    <option value="Zingy">Zingy</option>
+</select>
+</div>
+        <button class="reset-btn" onclick="resetFilters()">Reset</button>
+    </div>
+
+    <div class="card-grid" id="mainGrid"></div>
+
+    <script>
+        const database = [
+           // --- COMMON ---
+{ name: "Tengu Bird's Nest", rarity: "Common", group: "Fruit and Nuts", energy: 0, value: 2, time: 0, desc: "Move the other topmost ingredient from this cooktop to another." },
+{ name: "Low-Hanging Fruit", rarity: "Common", group: "Fruit and Nuts", energy: 0, value: 3, time: 0, desc: "Can only be played if you've played no other cards this turn." },
+{ name: "Mala Peppercorn", rarity: "Common", group: "Vegetable", energy: 0, value: 1, time: 0, desc: "<b>Garnish. 2 Spicy. 1 Zingy.</b>"},
+{ name: "Hot Potato Hashbrown", rarity: "Common", group: "Starch", energy: 1, value: 3, time: 1, desc: "If you <b>Burned</b> a card this turn, +3 value." },
+{ name: "Cinnamon Swirlpool", rarity: "Common", group: "Dairy", energy: 1, value: 4, time: 1, desc: "<b>Garnish</b>. Move all topmost ingredients from other cooktops into this one." },
+{ name: "Basilisk Leaves", rarity: "Common", group: "Vegetable", energy: 0, value: 5, time: 0, desc: "<b>Garnish</b>. <b>Cursed: Rock</b>." },
+{ name: "Squash", rarity: "Common", group: "Fruits and Nuts", energy: 1, value: 6, time: 0, desc: "Destroy all ingredients underneath until you hit a <b>Heavy</b> one." },
+{ name: "Roc Breast", rarity: "Common", group: "Meat", energy: 1, value: 13, time: 3, desc: "" },
+{ name: "Roque Fort Cheese", rarity: "Common", group: "Dairy", energy: 2, value: 4, time: 1, desc: "<b>4 Tough. Ready to Serve: 4 Tough.</b>" },
+{ name: "Watch Gourd", rarity: "Common", group: "Fruit and Nuts", energy: 2, value: 4, time: 1, desc: "<b>Heavy. 2x Pack.</b>" },
+{ name: "Selkie Blubber", rarity: "Common", group: "Seafood", energy: 2, value: 4, time: 0, desc: "<b><b>2 Chill. Simmer:</b> Gain <b>2 Chill</b> more.</b>" },
+{ name: "Heartbeet", rarity: "Common", group: "Vegetable", energy: 2, value: 18, time: 3, desc: "On play, -1 cooktime for today." },
+
+// --- RARE ---
+{ name: "Than-Os", rarity: "Rare", group: "Fruit and Nuts", energy: 0, value: 2, time: 0, desc: "Split ingredients on all cooktops until their values are perfectly balanced." },
+{ name: "Leftover Rice", rarity: "Rare", group: "Starch", energy: 0, value: 2, time: 1, desc: "On play, -1 value. (<b>Burns</b> at 0)" },
+{ name: "Dimensional Doughnut", rarity: "Rare", group: "Starch", energy: 0, value: 6, time: 2, desc: "<b>End Turn:</b> If this is not on a cooktop, travel to a random one (wherever it is)." },
+{ name: "Black Hole Fungus", rarity: "Rare", group: "Vegetable", energy: 1, value: 6, time: 1, desc: "When the day ends, remove a random Tier 1 or lower card from your deck." },
+{ name: "Ancient Anglerfish", rarity: "Rare", group: "Seafood", energy: 1, value: 2, time: 2, desc: "<b>Draw 4</b>. <b>Simmer: Discard 1 </b>." },
+{ name: "Mermaid's Tears", rarity: "Rare", group: "Seafood", energy: 1, value: 4, time: 1, desc: "Gain +1 value for each extra card you drew this turn." },
+{ name: "Aloe Vera", rarity: "Rare", group: "Vegetable", energy: 1, value: 3, time: 1, desc: "If you took <b>Stress</b> this turn, gain <b>6 Tough</b>." },
+{ name: "Ouroboros Onion Rings", rarity: "Rare", group: "Starch", energy: 1, value: 3, time: 1, desc: "You always have a copy of this in your hand." },
+{ name: "Boomerang Bagel", rarity: "Rare", group: "Starch", energy: 1, value: 5, time: 1, desc: "<b>Tempt All 1</b>. When you play a card, return this from the cooktop to your hand." },
+{ name: "Frost Wyrm Nuggets", rarity: "Rare", group: "Meat", energy: 2, value: 3, time: 1, desc: "<b>3 Chill. 2 Tough</b>"},
+{ name: "Monk's Wine", rarity: "Rare", group: "Fruit and Nuts", energy: 1, value: 10, time: 3, desc: "Draw 2. Randomize all ingredient costs in your hand from 0-3." },
+{ name: "Red Sea Cleaver", rarity: "Rare", group: "Tool", energy: 1, desc: "Remove the centre cooktop dish. Split half its value onto each other cooktop." },
+{ name: "Loremaster Leek", rarity: "Rare", group: "Vegetable", energy: 2, value: 2, time: 0, desc: "Has +1 value for each unique ingredient in your deck." },
+{ name: "Lava Chocolate", rarity: "Rare", group: "Dairy", energy: 2, value: 9, time: 1, desc: "If this is in your hand at the end of the turn, <b>Burn</b> the other cards." },
+{ name: "Titan Jerky", rarity: "Rare", group: "Meat", energy: 2, value: 14, time: 2, desc: "<b>Fireproof. Persistent. Heavy.</b> Can't be reduced, discarded, or disappeared." },
+{ name: "Work, Peon!", rarity: "Rare", group: "Tool", energy: 1,  desc: "Choose a dish. It is immediately <b>Ready to Serve</b>"},
+{ name: "Winter Warmelon", rarity: "Rare", group: "Fruits and Nuts", energy: 4, value: 12, time: 0, desc: "Costs (1) less for each stack of <b>Chill</b>." },
+
+
+
+
+// --- EPIC ---
+{ name: "Razor Clam", rarity: "Epic", group: "Seafood", energy: 1, value: 0, time: 1, desc: "<b>5 Tough. Ready to Serve</b>: Convert your excess <b>Tough</b> into value." },
+{ name: "Genie Lamp Stove", rarity: "Epic", group: "Tool", energy: 1, desc: "Get a card you've never won with before. If there aren't any, <b>Choose ANY Card.</b>" },
+{ name: "Horse Steed Radish", rarity: "Epic", group: "Vegetable", energy: 1, value: 4, time: 1, desc: "All topmost ingredients move right. If they can't, give them +4 value instead." },
+{ name: "Abrapaprika", rarity: "Epic", group: "Vegetable", energy: 1, value: 9, time: 2, desc: "Your deck ingredients disappear. <b>Ready to Serve:</b> Return them with +4 value." },
+{ name: "Pegasus Cloud Softserve", rarity: "Epic", group: "Dairy", energy: 2, value: 3, time: 1, desc: "Prevent the next two instances of damage you take. <b>Burn</b>" },
+{ name: "Save-The-Date Fruit", rarity: "Epic", group: "Fruit and Nuts", energy: 2, value: 0, time: 2, desc: "<b>Unique. One Use</b>. Remember the dishes on all cooktops. <b>Ready to Serve:</b> Bring them back (minus this)." },
+{ name: "Giant Octopus Tako", rarity: "Epic", group: "Seafood", energy: 3, value: 8, time: 1, desc: "<b>Heavy.</b> Place 8 other ingredients from your deck onto random cooktops. <b>Burn.</b>" },
+
+        ];
+
+       function filterData() {
+    const search = document.getElementById('filterSearch').value.toLowerCase();
+    const rarity = document.getElementById('filterRarity').value;
+    const group = document.getElementById('filterGroup').value;
+    const energy = document.getElementById('filterEnergy').value;
+    const mechanic = document.getElementById('filterMechanic').value.toLowerCase();
+
+    const filtered = database.filter(card => {
+        const cardName = card.name.toLowerCase();
+        const cardDesc = (card.desc || "").toLowerCase();
+        
+        const matchSearch = cardName.includes(search);
+        const matchRarity = rarity === "All" || card.rarity === rarity;
+        const matchGroup = group === "All" || card.group === group;
+        const matchEnergy = !energy || card.energy <= parseInt(energy);
+        
+       // Mechanic Logic
+       // Mechanic Logic
+let matchMechanic = true;
+if (mechanic !== "all") {
+    if (mechanic === "energize") {
+        matchMechanic = cardDesc.includes("energize") || cardDesc.includes("energy");
+    } else if (mechanic === "transform") {
+        matchMechanic = cardDesc.includes("transform") || cardDesc.includes("merge");
+    } else if (mechanic === "hunger") {
+        matchMechanic = cardDesc.includes("hunger") || cardDesc.includes("satisfy");
+    } else if (mechanic === "conjure") {
+        matchMechanic = cardDesc.includes("conjure");
+    } else if (mechanic === "chill") {
+        matchMechanic = cardDesc.includes("chill");
+    } else if (mechanic === "move") { 
+        // Catching all the movement-style words here!
+        matchMechanic = cardDesc.includes("move") || 
+                        cardDesc.includes("push") || 
+                        cardDesc.includes("pull") || 
+                        cardDesc.includes("split") || 
+                        cardDesc.includes("toss");
+    } else {
+        matchMechanic = cardDesc.includes(mechanic) || cardName.includes(mechanic);
+    }       
+        }
+
+        return matchSearch && matchRarity && matchGroup && matchEnergy && matchMechanic;
+    });
+    renderCards(filtered);
+}
+
+       function resetFilters() {
+    document.getElementById('filterSearch').value = "";
+    document.getElementById('filterRarity').value = "All";
+    document.getElementById('filterGroup').value = "All";
+    document.getElementById('filterEnergy').value = "";
+    document.getElementById('filterMechanic').value = "All"; // Add this line!
+    renderCards(database);
+}
+
+        function renderCards(data) {
+            const grid = document.getElementById('mainGrid');
+            grid.innerHTML = "";
+            ["Common", "Rare", "Epic"].forEach(r => {
+                const groupData = data.filter(c => c.rarity === r);
+                if (groupData.length > 0) {
+                    const h = document.createElement('div');
+                    h.className = 'rarity-header';
+                    h.innerText = r;
+                    grid.appendChild(h);
+                    groupData.forEach(card => {
+                        const div = document.createElement('div');
+                        div.className = `card ${card.rarity}`;
+                        div.innerHTML = `
+                            <div class="card-type-bar"></div>
+                            <div class="card-content">
+                                <div class="card-header">
+                                    <span class="card-title">${card.name}</span>
+                                    <div class="energy-circle">${card.energy}</div>
+                                </div>
+                                <span class="food-tag">${card.group}</span>
+                                <div class="description">${card.desc || "..."}</div>
+                                <div class="stats-footer">
+                                    <div class="stat-box"><span class="stat-label">Value</span><span class="stat-value">${card.value}</span></div>
+                                    <div class="stat-box"><span class="stat-label">Time</span><span class="stat-value">${card.time}s</span></div>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(div);
+                    });
+                }
+            });
+        }
+        renderCards(database);
+    </script>
+</body>
+</html>
